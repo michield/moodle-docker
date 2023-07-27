@@ -7,10 +7,11 @@ services:
     volumes:
       - "${MOODLE_DOCKER_WWWROOT}:/var/www/html"
       - "${ASSETDIR}/web/apache2_faildumps.conf:/etc/apache2/conf-enabled/apache2_faildumps.conf"
+      - "${ASSETDIR}/web/apache2_phplist.conf:/etc/apache2/sites-enabled/apache2_phplist.conf"
     environment:
       MOODLE_DOCKER_DBNAME: moodle
       MOODLE_DOCKER_DBUSER: moodle
-      MOODLE_DOCKER_DBPASS: "m@0dl3ing"
+      MOODLE_DOCKER_DBPASS: "moodlepass"
       MOODLE_DOCKER_BROWSER: firefox
       MOODLE_DOCKER_WEB_HOST: "${MOODLE_DOCKER_WEB_HOST}"
   exttests:
@@ -22,3 +23,26 @@ services:
     image: "selenium/standalone-firefox${MOODLE_DOCKER_SELENIUM_SUFFIX:-}:${MOODLE_DOCKER_BROWSER_TAG}"
     volumes:
       - "${MOODLE_DOCKER_WWWROOT}:/var/www/html:ro"
+  phplist:
+    image: phplist:local
+    depends_on:
+      - db
+    volumes:
+      - /home/michiel/Projects/moodle-docker/phplist_config.php:/etc/phplist/config.php
+      - /home/michiel/Projects/phplist3:/var/www/phpList3
+      - images:/var/www/phpList3/public_html/images
+      - /home/michiel/Projects/phpListThemes:/var/www/phpList3/public_html/lists/admin/ui/
+      - /home/michiel/Projects/phpListPlugins:/var/www/phpList3/public_html/lists/admin/plugins/
+    environment:
+      DB_HOST: db
+      DB_USER: moodle
+      DB_PASSWORD: "moodlepass"
+      DB_NAME: moodle
+      HOSTNAME: ${MOODLE_DOCKER_WEB_HOST}
+      ADMIN_PASSWORD: phplist
+      ADMIN_EMAIL: michiel@phplist.com
+      MAILHOST: mailpit
+      PORT: 80
+
+volumes:
+    images:
